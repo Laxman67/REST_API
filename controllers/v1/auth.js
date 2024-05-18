@@ -14,7 +14,7 @@ export const loginUser = (req, res) => {
   const { username, password } = req.body;
 
   const user = users.find(
-    (user) => user.username === username && user.password === password,
+    (user) => user.username === username && user.password === password
   );
 
   console.log(user);
@@ -30,6 +30,28 @@ export const loginUser = (req, res) => {
     });
     res.status(200).json({
       accessToken,
+    });
+  }
+};
+
+export const verifyJWT = (req, res, next) => {
+  const token = req.authorization.split(" ")[1];
+
+  if (token) {
+    jwt.verify(token, SECRET_KEY, (err, decoded) => {
+      if (err) {
+        return res.status(401).json({
+          success: false,
+          message: "Invalid Token",
+        });
+      }
+      req.username = decoded.username;
+      next();
+    });
+  } else {
+    return res.status(401).json({
+      success: false,
+      message: "No Token Provided",
     });
   }
 };
